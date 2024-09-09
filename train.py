@@ -38,13 +38,20 @@ def train(args):
 
     ds = load_dataset("json", data_files={"train": args.train_dataset_path, "test": args.test_dataset_path})
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint, use_fast=True)
+    # Define a padding token if it's not already set
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token  # or set a specific padding token
     ds = change_data(ds, args.data_type)
 
+    # def model_init():
+    #     return AutoModelForSequenceClassification.from_pretrained(model_checkpoint, return_dict=True)
     def model_init():
-        return AutoModelForSequenceClassification.from_pretrained(model_checkpoint, return_dict=True)
+        model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, return_dict=True)
+        model.config.pad_token_id = tokenizer.pad_token_id  # Set the pad_token_id in the model configuration
+        return model
 
     def preprocess_function(examples):
-        return tokenizer(examples["text"], truncation=True, max_length=4096)
+        return tokenizer(examples["text"], truncation=True, max_length=409, padding="max_length", return_tensors="pt")
 
     encoded_ds = ds.map(preprocess_function, batched=True, num_proc=100)
     encoded_ds = encoded_ds.rename_column('label', 'labels')
@@ -58,6 +65,7 @@ def train(args):
     args.output_dir = f"{args.output_dir}/{current_time}_{args.sub_name}"
     if not args.use_param_search:
         model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels[args.data_type])
+        model.config.pad_token_id = tokenizer.pad_token_id  # Set the pad_token_id in the model configuration
 
     def compute_metrics(p):
         metric = load_metric("accuracy")
