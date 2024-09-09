@@ -22,6 +22,8 @@ def parse_args():
     parser.add_argument('--data_type', type=int, default=0, help='Data type for the task')
     parser.add_argument('--use_param_search', action='store_true', help='Enable hyperparameter search')
     parser.add_argument('--sub_name', type=str, default="test", help='Name of the submission')
+    parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
+    
     return parser.parse_args()
 
 def load_deepspeed_config(deepspeed_config_path):
