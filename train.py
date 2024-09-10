@@ -10,6 +10,7 @@ from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification
 )
+import torch
 
 
 def train(args):
@@ -43,11 +44,16 @@ def train(args):
         tokenizer.pad_token = tokenizer.eos_token  # or set a specific padding token
     ds = change_data(ds, args.data_type)
 
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     # def model_init():
     #     return AutoModelForSequenceClassification.from_pretrained(model_checkpoint, return_dict=True)
     def model_init():
         model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, return_dict=True)
         model.config.pad_token_id = tokenizer.pad_token_id  # Set the pad_token_id in the model configuration
+        print(f"model.config device: {model.config.device}")
+        model.to(device)
         return model
 
     def preprocess_function(examples):
@@ -66,6 +72,7 @@ def train(args):
     if not args.use_param_search:
         model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels[args.data_type])
         model.config.pad_token_id = tokenizer.pad_token_id  # Set the pad_token_id in the model configuration
+        model.to(device)
 
     def compute_metrics(p):
         metric = load_metric("accuracy")
