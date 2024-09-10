@@ -1,12 +1,8 @@
 # deepSeedZero
-
-This repository contains the environment setup used for reproducing the issue described in [Hugging Face Transformers Issue #32312](https://github.com/huggingface/transformers/issues/32312).
+This repository was originally created to set up the environment for reproducing the issue discussed in [Hugging Face Transformers Issue #32312](https://github.com/huggingface/transformers/issues/32312). The issue has since been resolved, and you should now be able to run everything successfully.
 
 ## Environment Information
 
-To reproduce the issue, you will need the following environment specifications:
-
-### My Environment Setup
 - **GPU**: RTX 3090
 - **Python Version**: 3.10.14
 - **PyTorch Version**: 2.4.1+cu121
